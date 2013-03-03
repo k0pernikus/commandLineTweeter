@@ -1,57 +1,30 @@
 #!/usr/bin/env python2
-import tweepy, json
 from argparse import ArgumentParser
+from controller import Controller
 
-def init_twitter():
-	auth = tweepy.OAuthHandler(config["twitter"]["consumer-key"], config["twitter"]["consumer-secret"])
-	auth.set_access_token(config["twitter"]["access-token"], config["twitter"]["access-secret"])
-	api = tweepy.API(auth)
-	twitter = Twitter(api)
+def get_args():
+	parser = ArgumentParser()
+	parser.add_argument(
+		"-m",
+		"--message",
+		help="Message that will be posted on your timeline. Max 140 chars.",
+		required=False
+	)
 
-	return twitter
+	parser.add_argument(
+		"-tl",
+		"--timeline",
+		help="Show tweets of your timeline.",
+		action="store_true",
+		default=False,
+		required=False
+	)
 
-class argHandler(object):
-	def __init__(self):
-		self.api = init_twitter()
-	def message(self, message):
-		if message is not "":
-			self.api.tweet(message)
-			print "I just tweeted: " + message
-	def timeline(self, is_given):
-		#TODO: Print all the stream :D
-		pass
+	return vars(parser.parse_args())
 
-try:
-	with open("config.json") as config_fh:
-		config = json.load(config_fh)
-except IOError:
-	print "Please add config file with your username and password!"
+if __name__ == '__main__':
+	args = get_args()
+	controller = Controller()
 
-class Twitter(object):
-	def __init__(self, api):
-		self.api = api
-	def tweet(self, message):
-		self.api.update_status(message)
-
-parser = ArgumentParser()
-parser.add_argument(
-	"-m",
-	"--message",
-	help="Message that will be posted on your timeline. Max 140 chars.",
-	required=False
-)
-
-parser.add_argument(
-	"-tl",
-	"--timeline",
-	help="Show tweets of your timeline.",
-	action="store_true",
-	default=False,
-	required=False
-)
-
-args = vars(parser.parse_args())
-argHandler = argHandler()
-
-for key, value in args.items():
-	getattr(argHandler, key)(value)
+	for key, value in args.items():
+		getattr(controller, key)(value)
