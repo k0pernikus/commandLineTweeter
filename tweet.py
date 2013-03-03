@@ -1,35 +1,30 @@
 #!/usr/bin/env python2
-import tweepy, json
-
-try:
-	with open("config.json") as config_fh:
-		config = json.load(config_fh)
-except IOError:
-	print "Please add config file with your username and password!"
-
-class Twitter(object):
-	def __init__(self, api):
-		self.api = api
-	def tweet(self, message):
-		self.api.update_status(message)
-
 from argparse import ArgumentParser
+from controller import Controller
 
-parser = ArgumentParser()
-parser.add_argument(
-	"-m",
-	"--message",
-	help="Message that will be posted on your timeline. Max 140 chars.",
-	required=True
-)
+def get_args():
+	parser = ArgumentParser()
+	parser.add_argument(
+		"-m",
+		"--message",
+		help="Message that will be posted on your timeline. Max 140 chars.",
+		required=False
+	)
 
-args = vars(parser.parse_args())
-message = args['message']
+	parser.add_argument(
+		"-tl",
+		"--timeline",
+		help="Show tweets of your timeline.",
+		action="store_true",
+		default=False,
+		required=False
+	)
 
-auth = tweepy.OAuthHandler(config["twitter"]["consumer-key"], config["twitter"]["consumer-secret"])
-auth.set_access_token(config["twitter"]["access-token"], config["twitter"]["access-secret"])
+	return vars(parser.parse_args())
 
-api = tweepy.API(auth)
+if __name__ == '__main__':
+	args = get_args()
+	controller = Controller()
 
-twitter = Twitter(api)
-twitter.tweet(message)
+	for key, value in args.items():
+		getattr(controller, key)(value)
